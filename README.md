@@ -1,5 +1,6 @@
-This is using mysql, change the .env file to suit your database name and password
-to run this project : 
+NO NEED TO CHANGE .env file
+
+To run this project : 
 1. git clone https://github.com/hardytee1/rpl
 2. cd rpl
 3. go mod download
