@@ -15,12 +15,12 @@ import (
 func Register(c *gin.Context) {
 	//get the email/pass
 	var body struct {
-		Username string
-		Password string
-		Email string
-		Nama string
-		Biodata string
-		Notelpon string
+		Username string `json:"username" binding:"required"`
+		Password string `json:"password" binding:"required"`
+		Email string `json:"email" binding:"required"`
+		Nama string `json:"nama" binding:"required"`
+		Biodata string `json:"biodata" binding:"required"`
+		Notelpon string `json:"notelpon" binding:"required"`
 	}
 
 	if c.Bind(&body) != nil {
@@ -53,6 +53,7 @@ func Register(c *gin.Context) {
 	//generate a jwt token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
+		"roles": string(user.Role), // Convert Role to string for JWT claims
 		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
 	})
 
@@ -71,6 +72,8 @@ func Register(c *gin.Context) {
 
 	//Respond
 	c.JSON(http.StatusOK, gin.H{
-		"user" : user,
+		"success": true,
+		"message": "User successfully created",
+		"data" : user,
 	})
 }
