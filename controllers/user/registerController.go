@@ -2,18 +2,18 @@ package controllers
 
 import (
 	"net/http"
-	"time"
 	"os"
+	"time"
 
-	"github.com/hardytee1/rpl/initializers"
-	"github.com/hardytee1/rpl/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/hardytee1/rpl/initializers"
+	"github.com/hardytee1/rpl/models"
+	"github.com/hardytee1/rpl/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func Register(c *gin.Context) {
-	//get the email/pass
 	var body struct {
 		Username string `json:"username" binding:"required"`
 		Password string `json:"password" binding:"required"`
@@ -23,34 +23,38 @@ func Register(c *gin.Context) {
 		Notelpon string `json:"notelpon" binding:"required"`
 	}
 
-	if c.Bind(&body) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to read body",
-		})
+	if err := c.Bind(&body); err != nil {
+		utils.RespondError(c, http.StatusBadRequest, "Failed to read request body", map[string]interface{}{"error": err.Error()})
 		return
 	}
-	//Hash the password
-	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
 
+	err := c.ShouldBind(&body)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to hash password",
-		})
+		utils.RespondError(c, http.StatusBadRequest, "Failed to read request body", map[string]interface{}{"error": err.Error()})
 		return
 	}
 
-	//Create the user
-	user := models.User{Username: body.Username, Password: string(hash), Email: body.Email, Nama: body.Nama, Biodata: body.Biodata, Notelpon: body.Notelpon}
+	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
+	if err != nil {
+		utils.RespondError(c, http.StatusInternalServerError, "Failed to hash password", map[string]interface{}{"error": err.Error()})
+		return
+	}
+
+	user := models.User{
+		Username: body.Username,
+		Password: string(hash),
+		Email:    body.Email,
+		Nama:     body.Nama,
+		Biodata:  body.Biodata,
+		Notelpon: body.Notelpon,
+	}
+
 	result := initializers.DB.Create(&user)
-
 	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to create user",
-		})
+		utils.RespondError(c, http.StatusInternalServerError, "Failed to create user", map[string]interface{}{"error": result.Error.Error()})
 		return
 	}
 
-	//generate a jwt token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
 		"roles": string(user.Role), // Convert Role to string for JWT claims
@@ -58,22 +62,13 @@ func Register(c *gin.Context) {
 	})
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
-
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "jwt failed",
-		})
+		utils.RespondError(c, http.StatusInternalServerError, "Failed to generate JWT token", map[string]interface{}{"error": err.Error()})
 		return
 	}
 
-	//Send it back
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("Authorization", tokenString, 3600*24, "", "", false, true)
 
-	//Respond
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "User successfully created",
-		"data" : user,
-	})
+	utils.RespondSuccess(c, user, "User registered successfully")
 }

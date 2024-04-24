@@ -1,17 +1,12 @@
 package controllers
 
-import(
-	"net/http"
-
+import (
 	"github.com/gin-gonic/gin"
+	"github.com/hardytee1/rpl/utils"
 )
 
 func Logout(c *gin.Context) {
-    // Delete the cookie by setting its expiration time to a past date
-    c.SetCookie("Authorization", "", -1, "", "", false, true)
+	c.SetCookie("Authorization", "", -1, "", "", false, true)
 
-    // Respond with a success message or redirect the user to a login page
-    c.JSON(http.StatusOK, gin.H{
-        "message": "Logout successful",
-    })
+	utils.RespondSuccess(c, nil, "Logout successful")
 }
