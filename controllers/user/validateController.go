@@ -1,15 +1,18 @@
 package controllers
 
-import(
+import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/hardytee1/rpl/utils"
 )
 
 func Validate(c *gin.Context) {
-	user, _ := c.Get("user")
+	user, exists := c.Get("user")
+	if !exists {
+		utils.RespondError(c, http.StatusUnauthorized, "User not found in context", nil)
+		return
+	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": user,
-	})
+	utils.RespondSuccess(c, user, "User validated successfully")
 }

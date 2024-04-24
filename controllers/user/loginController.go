@@ -9,6 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/hardytee1/rpl/initializers"
 	"github.com/hardytee1/rpl/models"
+	"github.com/hardytee1/rpl/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -31,19 +32,14 @@ func Login(c *gin.Context) {
 	initializers.DB.Where("username = ?", body.Username).First(&user)
 
 	if user.ID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid Username or pass1",
-		})
+		utils.RespondError(c, http.StatusUnauthorized, "Invalid username or password", gin.H{"username": "Invalid credentials"})
 		return
 	}
 	//compare sent in pass with saved user pass hash
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 
-
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid Username or pass2",
-		})
+		utils.RespondError(c, http.StatusUnauthorized, "Invalid username or password", gin.H{"password": "Invalid credentials"})
 		return
 	}
 
@@ -56,9 +52,7 @@ func Login(c *gin.Context) {
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "jwt failed",
-		})
+		utils.RespondError(c, http.StatusInternalServerError, "Failed to generate token", nil)
 		return
 	}
 
@@ -66,8 +60,5 @@ func Login(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("Authorization", tokenString, 3600*24, "", "", false, true)
 
-	c.JSON(http.StatusOK, gin.H{
-		"token": tokenString,
-		"user":  user,
-	})
+	utils.RespondSuccess(c, gin.H{"token": tokenString, "user": user}, "Login successful")
 }
