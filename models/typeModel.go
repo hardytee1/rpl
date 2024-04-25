@@ -5,9 +5,9 @@ type Role string
 
 // Define the allowed roles as constants
 const (
-	RoleUser    Role = "user"
-	RoleTeacher Role = "teacher"
-	RoleAdmin   Role = "admin"
+	RoleUser    Role = "USER"
+	RoleTeacher Role = "TEACHER"
+	RoleAdmin   Role = "ADMIN"
 )
 
 // ValidateRole checks if a given role is valid

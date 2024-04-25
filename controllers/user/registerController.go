@@ -24,13 +24,7 @@ func Register(c *gin.Context) {
 	}
 
 	if err := c.Bind(&body); err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "Failed to read request body", map[string]interface{}{"error": err.Error()})
-		return
-	}
-
-	err := c.ShouldBind(&body)
-	if err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "Failed to read request body", map[string]interface{}{"error": err.Error()})
+		utils.RespondError(c, http.StatusBadRequest, "Failed to register", map[string]interface{}{"error": err.Error()})
 		return
 	}
 
@@ -70,5 +64,5 @@ func Register(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("Authorization", tokenString, 3600*24, "", "", false, true)
 
-	utils.RespondSuccess(c, user, "User registered successfully")
+	utils.RespondSuccess(c, nil, "User registered successfully")
 }

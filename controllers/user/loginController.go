@@ -61,5 +61,19 @@ func Login(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("Authorization", tokenString, 3600*24, "", "", false, true)
 
-	utils.RespondSuccess(c, gin.H{"token": tokenString, "user": user}, "Login successful")
+	type ResponseData struct {
+		ID       uint    `json:"ID"` // Field tags ensure correct key names in JSON output
+		Username string `json:"Username"`
+		Email    string `json:"Email"`
+		Token    string `json:"Token"`
+	}
+
+	responseData :=  ResponseData{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+		Token:    tokenString,
+	}
+
+	utils.RespondSuccess(c, responseData, "Login successful")
 }
