@@ -15,5 +15,8 @@ func init(){
 func main() {
 	r := gin.Default()
 	router.UserRouter(r)
+	router.TeacherRouter(r)
+	router.WtsRouter(r)
+	router.WtbRouter(r)
 	r.Run()
 }

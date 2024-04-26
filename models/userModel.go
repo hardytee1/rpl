@@ -12,5 +12,6 @@ type User struct {
 	Nama string `json:"nama" binding:"required"`
 	Biodata string `json:"biodata" binding:"required"`
 	Notelpon string `json:"notelpon" binding:"required"`
-	Role Role `gorm:"default: user"`
+	Role Role `gorm:"default: USER"`
+	Wtb []Wtb
 }
