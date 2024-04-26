@@ -47,5 +47,5 @@ func CreateWtb(c *gin.Context) {
 		return
 	}
 
-	utils.RespondSuccess(c, wtb, "WTS posted successfully")
+	utils.RespondSuccess(c, wtb, "WTB posted successfully")
 }
