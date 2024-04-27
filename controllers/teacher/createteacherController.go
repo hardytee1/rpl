@@ -9,32 +9,30 @@ import (
 	"github.com/hardytee1/rpl/utils"
 )
 
-type CreateTeacherRequest struct {
-	Pendidikan string                `json:"pendidikan" binding:"required"`
-	Bukti_1    *multipart.FileHeader `form:"bukti_1" binding:"required"`
-}
-
 
 func CreateTeacher(c *gin.Context) {
-	var req CreateTeacherRequest
+	var body struct{
+		Pendidikan string                `json:"pendidikan" binding:"required"`
+		Bukti_1    *multipart.FileHeader `form:"bukti_1" binding:"required"`
+	}
 
 	// Bind JSON data
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.Bind(&body); err != nil {
 		utils.RespondError(c, http.StatusBadRequest, "Failed to create", map[string]interface{}{"error": err.Error()})
 		return
 	}
 
 	// Get the file
-	file, err := req.Bukti_1.Open()
+	file, err := body.Bukti_1.Open()
 	if err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, "Failed to open file", map[string]interface{}{"error": err.Error()})
 		return
 	}
 	defer file.Close()
 
-	
-	filepath := "C:/Users/Hp/Desktop/tugas skuull/website/rpl/file.pdf"
-	err = c.SaveUploadedFile(req.Bukti_1, filepath)
+	// "C:/Users/Hp/Desktop/tugas skuull/website/rpl/file.pdf"
+	filepath := "c:/Users/hardy/Downloads/file.pdf"
+	err = c.SaveUploadedFile(body.Bukti_1, filepath)
 	if err != nil {
 	    utils.RespondError(c, http.StatusInternalServerError, "Failed to save file", map[string]interface{}{"error": err.Error()})
 	    return
@@ -55,7 +53,7 @@ func CreateTeacher(c *gin.Context) {
 
 	// Create teacher object with file path or other necessary data
 	teacher := models.Teacher{
-		Pendidikan: req.Pendidikan,
+		Pendidikan: body.Pendidikan,
 		Bukti_1:    filepath, // Use the file path here
 		UserID:     usr.ID,
 	}
