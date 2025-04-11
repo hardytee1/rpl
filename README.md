@@ -8,4 +8,4 @@ To run this project :
 
 NOTE: if you havent download Go before, please download it first. Download here https://go.dev/dl/
 
-tes
+ini dari branch baru
